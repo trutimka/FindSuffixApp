@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -17,22 +18,27 @@ namespace FindSuffixApp
 
         private new void AddText(string text)
         {
-            var words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var words = Regex.Split(text.ToLower(), @"\W+");
+
             foreach (var word in words)
             {
-                if (_wordFrequency.ContainsKey(word))
+                if (!string.IsNullOrWhiteSpace(word))
                 {
-                    _wordFrequency[word]++;
-                }
-                else
-                {
-                    _wordFrequency[word] = 1;
+                    if (_wordFrequency.ContainsKey(word))
+                    {
+                        _wordFrequency[word]++;
+                    }
+                    else
+                    {
+                        _wordFrequency[word] = 1;
+                    }
                 }
             }
         }
 
         private string GetSuggestion(string prefix)
         {
+            prefix = prefix.ToLower();
             var candidates = _wordFrequency.Where(w => w.Key.StartsWith(prefix)).ToList();
             if (!candidates.Any())
                 return "Нет подходящих слов";
@@ -55,7 +61,7 @@ namespace FindSuffixApp
 
         private void PrefixTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var prefix = PrefixTextBox.Text.Trim();
+            var prefix = PrefixTextBox.Text.Trim().ToLower();
             if (!string.IsNullOrEmpty(prefix))
             {
                 var suggestion = GetSuggestion(prefix);
